@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Continental Ops</title>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <style>
+        :root {
+            --bg-dark: #040508;
+            --bg-card: #090d16;
+            --primary: #00bcff;       
+            --retro-green: #00ff41;   
+            --secondary: #bd00ff;     
+            --cyber-red: #ff0055;     
+            --text-light: #f1f5f9;
+            --text-muted: #475569;
+            --border: #1e1b4b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Courier New', Courier, monospace, sans-serif;
+            color: var(--text-light);
+            line-height: 1.6;
+            background-color: var(--bg-dark);
+        }
+
+        /* Scanline Overlay - Tuned for Green/Blue/Purple */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), 
+                        linear-gradient(90deg, rgba(0, 255, 65, 0.02), rgba(0, 188, 255, 0.02), rgba(189, 0, 255, 0.03));
+            z-index: 9999;
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+        /* Navigation */
+        nav {
+            background: var(--bg-dark);
+            border-bottom: 2px dashed var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary); /* BLUE LOGO */
+            text-decoration: none;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px var(--primary);
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-light);
+            margin-left: 20px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        .nav-links a:hover { 
+            color: var(--secondary); 
+            text-shadow: 0 0 8px var(--secondary);
+        }
+
+        /* Hero Section */
+        header {
+            padding: 100px 0;
+            text-align: center;
+            border-bottom: 1px dashed var(--border);
+            background: radial-gradient(circle at top, #120d24 0%, var(--bg-dark) 70%);
+        }
+        header h1 { 
+            font-size: 3rem; 
+            margin-bottom: 20px; 
+            font-weight: 900; 
+            letter-spacing: -1px;
+            color: var(--text-light);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        /* GREEN STATUS TEXT */
+        header h1 span { 
+            color: var(--retro-green); 
+            text-shadow: 0 0 8px var(--retro-green);
+        }
+        header p { font-size: 1.1rem; color: var(--text-muted); max-width: 700px; margin: 0 auto 30px; }
+        
+        /* Buttons - RETRO GREEN */
+        .btn {
+            display: inline-block;
+            background: transparent;
+            color: var(--primary);
+            padding: 12px 28px;
+            text-decoration: none;
+            font-weight: 700;
+            letter-spacing: 1px;
+            border: 2px solid var(--primary);
+            transition: all 0.2s ease;
+            box-shadow: 0 0 5px rgba(0, 255, 65, 0.2);
+        }
+        .btn:hover { 
+            background: var(--primary);
+            color: var(--bg-dark);
+            box-shadow: 0 0 20px var(--primary);
+            transform: translateY(-1px);
+        }
+
+        /* Section Styling */
+        section { padding: 90px 0; border-bottom: 1px dashed var(--border); }
+        /* PURPLE HEADERS */
+        section h2 { font-size: 2rem; margin-bottom: 10px; text-align: center; letter-spacing: 1px; color: var(--secondary); text-shadow: 0 0 5px rgba(189, 0, 255, 0.4); }
+        .section-subtitle { text-align: center; color: var(--text-muted); margin-bottom: 50px; }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        .card {
+            background: var(--bg-card);
+            padding: 35px;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+        .card::before {
+            content: "[::]";
+            position: absolute;
+            top: -10px; left: 10px;
+            background: var(--bg-dark);
+            color: var(--border);
+            font-size: 0.8rem;
+            padding: 0 5px;
+        }
+        .card:hover {
+            border-color: var(--primary); /* Blue hover on cards */
+            box-shadow: inset 0 0 15px rgba(0, 188, 255, 0.1), 0 0 10px rgba(0, 188, 255, 0.15);
+        }
+        .card h3 { margin-bottom: 15px; color: var(--primary); text-shadow: 0 0 3px rgba(0, 188, 255, 0.3); }
+
+        .bg-alternate { background-color: var(--bg-card); }
+
+        /* Contact Section */
+        .contact-info { text-align: center; font-size: 1.1rem; }
+        .contact-info p { margin-bottom: 20px; }
+        /* Reduced Red usage - kept for strong emphasis only if needed, otherwise green */
+        .contact-info strong { color: var(--retro-green); text-shadow: 0 0 5px rgba(0, 255, 65, 0.4); }
+
+        /* Footer */
+        footer {
+            background: #020305;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 40px 0;
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 2rem; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="container nav-container">
+            <a href="#" class="logo">Continental Operations, LLC</a>
+            <div class="nav-links">
+		<a href="#services">./services</a>
+                <a href="#about">./about</a>
+		<a href="#contact">./connect</a>
+            </div>
+        </div>
+    </nav>
+
+    <header>
+        <div class="container">
+            <h1>STATUS_LINK: <span style="color: var(--retro-green); text-shadow: 0 0 8px var(--retro-green);">CONNECTED_</span></h1>
+            <p>====================================================================<br>
+	     <span style="color: var(--cyber-red); text-shadow: 0 0 5px var(--cyber-red);">We're not a vendor with a sales pitch.</span><br>
+	     <span style="color: var(--primary); text-shadow: 0 0 5px var(--primary);">We like to think we're a member of your team.</span><br>
+             <span style="color: var(--cyber-red); text-shadow: 0 0 5px var(--cyber-red);">We don't believe in overpriced fluff that adds no real value to your business.</span><br>
+             <span style="color: var(--primary); text-shadow: 0 0 5px var(--primary);">We believe in providing IT solutions unique to your needs so you can focus on what matters most to you.</span>
+            ====================================================================</p>
+            <a href="#contact" class="btn">> CONNECT_NOW</a>
+        </div>
+    </header>
+
+    <section id="services">
+        <div class="container">
+            <h2>SERVICES</h2>
+            <p class="section-subtitle">services.msc</p>
+            
+            <div class="grid">
+                <div class="card">
+                    <h3>0x01 //NETWORK</h3>
+                    <p>Management of your On-Prem infrastructure, including ISP cutovers, Firewalls, Wi-Fi, Servers, and Workstations.</p>
+                </div>
+                <div class="card">
+                    <h3>0x02 //CLOUD</h3>
+                    <p>Whether you're looking to make the move to the cloud or you're already there, we got you covered.</p>
+                </div>
+                <div class="card">
+                    <h3>0x03 //SECURE</h3>
+                    <p>Security Assessments to find the gaps in your network before the bad guys do.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="bg-alternate">
+        <div class="container" style="max-width: 800px; text-align: center;">
+            <h2>ABOUT</h2>
+            <p class="section-subtitle">whoami</p>
+            <p style="text-align: left; background: var(--bg-dark); padding: 20px; border: 1px solid var(--border); box-shadow: inset 0 0 10px rgba(0,0,0,0.8);">
+            &nbsp;&nbsp;&nbsp;&nbsp;Continental Operations, LLC is an IT Consultancy based in the San Francisco Bay Area. With over 15 years of experience supporting companies ranging from law firms, financial advisors, retail and health care, to small Mom n' Pop shops and home users, we want to be your partner to ensure your business critical systems stay operational.
+            <br><br>        
+	     
+            </p>
+        </div>
+    </section>
+
+    <section id="contact">
+        <div class="container">
+            <h2>CONNECT</h2>
+            <p class="section-subtitle">Hello, Friend</p>
+            
+            <form id="contactForm" style="max-width: 500px; margin: 0 auto; text-align: left;">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: var(--cyber-red);">[NAME]</label>
+                    <input type="text" name="name" required style="width: 100%; padding: 10px; background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-light); font-family: monospace;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: var(--cyber-red);">[EMAIL]</label>
+                    <input type="email" name="email" required style="width: 100%; padding: 10px; background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-light); font-family: monospace;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: var(--cyber-red);">[MESSAGE]</label>
+                    <textarea name="message" rows="5" required style="width: 100%; padding: 10px; background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-light); font-family: monospace; resize: vertical;"></textarea>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <div class="cf-turnstile" data-sitekey="YOUR_TURNSTILE_SITE_KEY" data-theme="dark"></div>
+                </div>
+
+                <button type="submit" class="btn" style="width: 100%; cursor: pointer;">> SEND_MESSAGE</button>
+                <p id="formStatus" style="margin-top: 15px; text-align: center; display: none; font-weight: bold;"></p>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026-<script>document.write(new Date().getFullYear())</script> Continental Operations, LLC. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
